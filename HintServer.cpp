@@ -261,21 +261,39 @@ int cmd_showhint(int argc, wchar_t *argv[]) {
 
 		const Color black = Color(0, 0, 0, OpaqueOpacity);
 		const Color white = Color(QuantumRange, QuantumRange, QuantumRange, OpaqueOpacity);
+		const Color red = Color(MaxRGB, 0, 0, OpaqueOpacity);
+		const Color transparent = Color(MaxRGB, MaxRGB, MaxRGB, TransparentOpacity);
 
 		Image image;
 		image.read(hbg);
 
-		image.fontPointsize( 80 );
+		Geometry geo = image.size();
 
-		image.fillColor( black );
-		image.strokeColor( black );
-		image.strokeWidth( 8 );
-		image.annotate(hint, CenterGravity);
+		const double interline_space = 60;
+		const double font_size = 80;
 
-		image.fillColor( white );
-		image.strokeColor( white );
-		image.strokeWidth( 0 );
-		image.annotate(hint, CenterGravity);
+		Image caption_outline(geo, transparent);
+		caption_outline.backgroundColor(transparent);
+		caption_outline.textGravity(CenterGravity);
+		caption_outline.textInterlineSpacing(interline_space);
+		caption_outline.fontPointsize( font_size );
+		caption_outline.fillColor( black );
+		caption_outline.strokeWidth( 1000.0 );
+		caption_outline.strokeColor( black );
+		caption_outline.read("CAPTION:" + hint);
+
+		Image caption_fill(geo, transparent);
+		caption_fill.textInterlineSpacing(interline_space);
+		caption_fill.backgroundColor(transparent);
+		caption_fill.textGravity(CenterGravity);
+		caption_fill.fontPointsize( font_size );
+		caption_fill.fillColor( white );
+		caption_fill.strokeColor( white );
+		caption_fill.strokeWidth( 0 );
+		caption_fill.read("CAPTION:" + hint);
+
+		image.composite(caption_outline, 0, 0, OverCompositeOp);
+		image.composite(caption_fill, 0, 0, OverCompositeOp);
 
 		image.write(out);
 
