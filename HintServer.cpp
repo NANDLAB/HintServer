@@ -136,6 +136,18 @@ void vlcErrorHandler() {
 	exit(EXIT_FAILURE);
 }
 
+const wstring help =
+LR"delim(Usage: HintServer [OPTION]...
+Listen on a port for commands to show hints or play media.
+
+Default arguments for options are shown in parenthesis.
+  -p, --port             (40000)    port for incoming UDP commands
+  -m, --mediadir         (~/Media)  media directory
+  -b, --background       (bg.jpg)   background image
+  -h, --hint-background  (hbg.jpg)  hint background image
+  -?, --help                        show this help and exit
+)delim";
+
 int wmain(int argc, wchar_t *argv[]) {
 	try {
 		mp.setFullscreen(true);
@@ -158,7 +170,7 @@ int wmain(int argc, wchar_t *argv[]) {
 		mediadir += L"Media/";
 		for (wchar_t **arg = argv+1; *arg != nullptr; arg++) {
 			if (!(wcscmp(*arg, L"--help") && wcscmp(*arg, L"-?"))) {
-				wcout << L"Help output." << endl;
+				wcout << help << endl;
 				exit(EXIT_SUCCESS);
 			}
 			else if (!(wcscmp(*arg, L"--port") && wcscmp(*arg, L"-p"))) {
@@ -237,23 +249,23 @@ int cmd_showhint(int argc, wchar_t *argv[]) {
 	}
 	try {
 		size_t hlen = wcslen(argv[1]);
-		char *c_hint = new char[hlen+1];
-		wcstombs(c_hint, argv[1], hlen+1);
+		char *c_hint = new char[4*hlen+1];
+		wcstombs(c_hint, argv[1], 4*hlen+1);
 		string hint = c_hint;
 		delete [] c_hint;
 
 		wstring w_hbg = mediadir + hint_background;
 		size_t hbg_len = wcslen(w_hbg.data());
-		char *c_hbg = new char[hbg_len+1];
-		wcstombs(c_hbg, w_hbg.data(), hbg_len+1);
+		char *c_hbg = new char[4*hbg_len+1];
+		wcstombs(c_hbg, w_hbg.data(), 4*hbg_len+1);
 		string hbg = c_hbg;
 		delete [] c_hbg;
 
 		wostringstream w_out;
 		w_out << mediadir << L"tmp" << tmp_index << L".png";
 		size_t outlen = w_out.str().size();
-		char *c_out = new char[outlen+1];
-		wcstombs(c_out, w_out.str().data(), outlen+1);
+		char *c_out = new char[4*outlen+1];
+		wcstombs(c_out, w_out.str().data(), 4*outlen+1);
 		string out = c_out;
 		delete [] c_out;
 
@@ -312,8 +324,8 @@ int cmd_showhint(int argc, wchar_t *argv[]) {
 int cmd_showbg(int argc, wchar_t *argv[]) {
 	wstring bg = mediadir + background;
     size_t bglen = bg.size();
-	char *mbs = new char [bglen+1];
-	wcstombs(mbs, bg.data(), bglen+1);
+	char *mbs = new char [4*bglen+1];
+	wcstombs(mbs, bg.data(), 4*bglen+1);
 	VLC::Media media = VLC::Media(instance, mbs, VLC::Media::FromPath);
 	mp.pause();
 	mp.setMedia(media);
@@ -328,8 +340,8 @@ int cmd_playmedia(int argc, wchar_t *argv[]) {
 	}
 	wstring m = mediadir + argv[1];
     size_t mlen = m.size();
-	char *mbs = new char [mlen+1];
-	wcstombs(mbs, m.data(), mlen+1);
+	char *mbs = new char [4*mlen+1];
+	wcstombs(mbs, m.data(), 4*mlen+1);
 	VLC::Media media = VLC::Media(instance, mbs, VLC::Media::FromPath);
 	mp.pause();
 	mp.setMedia(media);
